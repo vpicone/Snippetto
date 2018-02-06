@@ -1,0 +1,64 @@
+
+
+mutation AddScore($userId: ID!, $libraryId: ID!, $score: Int!) {
+  addScore(userId: $userId, libraryId: $libraryId, score: $score) {
+    username
+    id
+    scores {
+      value
+      library {
+        name
+      }
+    }
+  }
+}
+
+{
+  "userId": "5a28b1e0c65d6e0e85c5ee5e",
+  "libraryId": "5a28c4794d62b91126548c4b",
+  "score": 1200
+}
+
+
+mutation CreateGame($user: ID!, $library: ID!) {
+  createGame(user: $user, library: $library) {
+    library {
+      name
+    }
+    snippets {
+      id
+      name
+      completed
+      completeTime
+    }
+  }
+}
+
+{
+  "user": "5a28b1e0c65d6e0e85c5ee5e",
+  "library": "5a28c4794d62b91126548c4b"
+}
+
+
+mutation SubmitAnswer($answer: String!, $snippet: ID!, $game: ID!, $remainingTime: Int!) {
+  submitAnswer(answer: $answer, snippet: $snippet, game: $game, remainingTime: $remainingTime) {
+    id
+    currentScore
+    library {
+      name
+    }
+    snippets {
+      id
+      completed
+      name
+      prefix
+    }
+  }
+}
+
+{
+  "answer": "fs",
+  "game": "5a2f0f5ba4b4702affd6e677",
+  "snippet": "5a299f31e7bff415129d5ba8",
+  "remainingTime": 1
+}

@@ -1,0 +1,30 @@
+{
+  "name": "snipetto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"nodemon index.js\" \"npm run start --prefix client\"",
+    "test": "NODE_ENV=test nodemon --exec 'mocha --recursive -R min'",
+    "add-lib": "node create-new-library.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^1.2.0",
+    "body-parser": "^1.15.2",
+    "concurrently": "^3.5.1",
+    "express": "^4.14.0",
+    "graphql": "^0.11.7",
+    "graphql-tools": "^2.12.0",
+    "lodash": "^4.17.4",
+    "mocha": "^3.2.0",
+    "mongoose": "^4.7.1",
+    "prompt": "^1.0.0",
+    "supertest": "^2.0.1",
+    "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.5"
+  }
+}
