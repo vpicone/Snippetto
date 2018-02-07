@@ -8,31 +8,25 @@ const SnippetSchema = new Schema({
   description: String
 });
 
+const LinkSchema = new Schema({
+  name: String,
+  url: String
+});
+
 const LibrarySchema = new Schema({
   name: {
     type: String,
     required: true,
     unique: true
   },
-  language: {
-    type: String,
-    trim: true
-  },
-  url: {
-    type: String,
+  tags: {
+    type: [String],
     lowercase: true,
-    unique: true,
     trim: true
   },
+  links: [LinkSchema],
   description: String,
-  snippets: [SnippetSchema],
-  highScore: {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "user"
-    },
-    score: Number
-  }
+  snippets: [SnippetSchema]
 });
 
 const Library = mongoose.model("library", LibrarySchema);

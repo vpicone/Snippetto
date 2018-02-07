@@ -108,7 +108,7 @@ class Game extends Component {
     if (!this.state.currentSnippet) {
       return null;
     }
-    const { name, description, prefix } = this.state.currentSnippet;
+    const { name, description } = this.state.currentSnippet;
     const answeredCount =
       this.state.completed.length + this.state.skipped.length;
 

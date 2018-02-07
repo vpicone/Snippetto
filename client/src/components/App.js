@@ -3,10 +3,9 @@ import styled from "styled-components";
 import { Route } from "react-router-dom";
 
 // import LibraryList from "./LibraryList";
-import LanguageList from "./languages/LanguageList";
-import Leaderboards from "./Leaderboards";
 import LibraryDetail from "./libraries/LibraryDetail";
-import LandingPage from "./LandingPage";
+// import LandingPage from "./LandingPage";
+import LibraryList from "./librarylist";
 import { Layout } from "antd";
 import Header from "./Header";
 
@@ -29,9 +28,7 @@ class App extends Component {
         <Content
           style={{ padding: "0 50px", minHeight: "90vh", margin: " 2rem auto" }}
         >
-          <Route exact path="/" component={LandingPage} />
-          <Route exact path="/leaderboards" component={Leaderboards} />
-          <Route exact path="/languages" component={LanguageList} />
+          <Route exact path="/" component={LibraryList} />
           <Route path="/libraries/:id" component={LibraryDetail} />
         </Content>
 

@@ -2,7 +2,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
-const routes = require("./routes/routes");
 const myGraphQLSchema = require("./schema");
 
 const app = express();

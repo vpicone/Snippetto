@@ -6,7 +6,7 @@ const QUERY = gql`
   query libraryDetail($id: ID!) {
     library(id: $id) {
       name
-      url
+      urls
       id
       snippets {
         id

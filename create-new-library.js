@@ -4,6 +4,7 @@ const prompt = require("prompt");
 const fs = require("fs");
 const path = require("path");
 const xml2js = require("xml2js");
+const util = require("util");
 
 const Library = require("./models/Library");
 
@@ -12,19 +13,64 @@ mongoose.connect("mongodb://localhost/snipetto", {
   useMongoClient: true
 });
 
-async function getLibraryObject(fileName) {
-  const filePath = path.join(__dirname, `extensions/${fileName}`);
-  let metadata = {};
+const getFilePath = fileName => {
+  return path.join(__dirname, `extensions/${fileName}`);
+};
 
-  var parser = new xml2js.Parser();
-  fs.readFile(filePath + "/extension.vsixmanifest", function(err, data) {
-    parser.parseString(data, function(err, result) {
-      // metadata = result;
-      console.log(result.PackageManifest.Metadata);
-    });
+async function getLibraryDetails(fileName) {
+  const filePath = getFilePath(fileName);
+  const library = {};
+  var parser = new xml2js.Parser({
+    mergeAttrs: true,
+    explicitArray: false,
+    explicitCharkey: true,
+    normalizeTags: true
   });
 
-  const fileNames = await fs.readdirSync(filePath + "/extension/snippets");
+  const data = fs.readFileSync(filePath + "/extension.vsixmanifest");
+  await parser.parseString(data, function(err, result) {
+    const metadata = result.packagemanifest.metadata;
+    // console.log(`${metadata.tags._.split(",").join("\n")}`);
+    const forbiddenTags = ["snippet", "vscode"];
+    const tags = _.uniq(
+      metadata.tags._.toLowerCase()
+        .split(",")
+        .filter(tag => {
+          return tag.match(RegExp(/^[^_\.]*$/)) && !forbiddenTags.includes(tag);
+        })
+    );
+
+    if (!tags.length) {
+      tags.push(metadata.displayname._.toLowerCase());
+    }
+
+    // Get Relevent links
+    const links = [];
+    metadata.properties.property
+      .filter(prop => {
+        return prop.Id.includes("Services.Links");
+      })
+      .forEach(linkProp => {
+        const uri = linkProp.Id.split(".");
+        links.push({
+          name: uri[4],
+          url: linkProp.Value
+        });
+        // links[uri[4]] = linkProp.Value;
+      });
+
+    library.name = metadata.displayname._;
+    library.links = links;
+    library.tags = tags;
+    library.description = metadata.description._;
+  });
+  return library;
+}
+
+function getLibraryObject(fileName) {
+  const filePath = getFilePath(fileName);
+
+  const fileNames = fs.readdirSync(filePath + "/extension/snippets");
   const pooledSnippets = {};
   fileNames.forEach(fileName => {
     const data = fs.readFileSync(`${filePath}/extension/snippets/${fileName}`);
@@ -33,11 +79,15 @@ async function getLibraryObject(fileName) {
     });
   });
 
-  const {DisplayName, Description, }
   return pooledSnippets;
 }
 
-const createLibrary = ({ libraryObject, name, language, url }) => {
+const createLibrary = async ({ fileName }) => {
+  const libraryObject = getLibraryObject(fileName);
+  // console.log(libraryObject);
+  const libraryDetails = await getLibraryDetails(fileName);
+  // console.log(libraryDetails);
+
   const snippetKeys = _.keys(libraryObject);
   const snippets = snippetKeys.map(key => {
     const prefix = libraryObject[key].prefix;
@@ -51,40 +101,40 @@ const createLibrary = ({ libraryObject, name, language, url }) => {
     };
   });
 
-  const library = new Library({ snippets, name, language, url });
-  library.save();
+  // console.log({
+  //   name: libraryDetails.name,
+  //   tags: libraryDetails.tags,
+  //   description: libraryDetails.description,
+  //   urls: libraryDetails.urls
+  // });
+
+  const { name, tags, description, links } = libraryDetails;
+
+  const library = new Library({
+    snippets,
+    name,
+    description,
+    tags,
+    links
+  });
+
+  // console.log({
+  // snippets,
+  // name,
+  // description,
+  // tags,
+  // urls
+  // });
+
+  // console.log(library);
+  await library.save();
 };
 
-const schema = {
-  properties: {
-    fileName: {
-      description: "File name in extensions folder",
-      required: true
-    },
-    name: {
-      description: "Name of the snippet library",
-      required: true
-    },
-    language: {
-      description:
-        "Name of the primary snippet programming language (default: Other)",
-      default: "Other"
-    },
-    url: {
-      description: "VSCode marketplace URL",
-      required: true
-    }
-  }
-};
+// console.log(fs.readdirSync(`${__dirname}/extensions/`));
 
-// prompt.start();
-
-// prompt.get(schema, async (err, result) => {
-//   if (err) {
-//     console.log("\n\nExiting early.");
-//     process.exit(0);
-//   }
-const libraryObject = getLibraryObject("onecentlin.laravel-blade-1.13.0");
-
-// createLibrary({ libraryObject, ...result });
-// });
+fs.readdir(`${__dirname}/extensions/`, (err, list) => {
+  list = list.filter(item => !/(^|\/)\.[^\/\.]/g.test(item));
+  list.forEach(lib => {
+    createLibrary({ fileName: lib });
+  });
+});
