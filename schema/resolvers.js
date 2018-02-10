@@ -5,23 +5,19 @@ const Library = require("../models/Library");
 
 const resolvers = {
   Query: {
-    library: (_, { id }) => Library.findById({ _id: id }),
+    libraryById: (_, { id }) => Library.findById({ _id: id }),
     allLibraries: () => Library.find({}),
-    allTags: async () => {
+    allLanguages: async () => {
       const allLibraries = await Library.find({});
-      const libraryTags = allLibraries.map(({ tags }) => tags);
-      return union(uniq(flatten(libraryTags)));
+      const allLanguages = allLibraries.map(({ languages }) => languages);
+      return union(uniq(flatten(allLanguages)));
     },
-    librariesByTag: (_, { tag }) => {
-      return Library.find({ tags: tag });
-    },
-    languages: async () => {
-      const allLibraries = await Library.find({});
-      return uniqBy(allLibraries, "language").map(({ language }) => {
-        const libraries = Library.find({ language });
-        return { name: language, libraries };
-      });
+    librariesByLanguage: (_, { language }) => {
+      return Library.find({ languages: language });
     }
+  },
+  Library: {
+    image({image}) {return image.public_id},
   }
 };
 

@@ -8,9 +8,14 @@ export default class HeaderContent extends Component {
   render() {
     return (
       <Header>
-        <Menu theme="dark" mode="horizontal" style={{ lineHeight: "64px" }}>
+        <Menu
+          defaultSelectedKeys={["1"]}
+          theme="dark"
+          mode="horizontal"
+          style={{ lineHeight: "64px" }}
+        >
           <Menu.Item key="1">
-            <Link to="/">Home</Link>
+            <Link to="/">Libraries</Link>
           </Menu.Item>
 
           <Menu.Item key="2">

@@ -1,10 +1,5 @@
 const typeDefs = `
 
-type Language {
-  name: String!
-  libraries: [Library]
-}
-
 type Link {
   name: String!
   url: String!
@@ -16,8 +11,11 @@ type Library {
     description: String
     tags: [String]
     snippets: [Snippet]
-    language: String
+    languages: [String]
+    publisher: String
+    version: String
     links: [Link]
+    image: String
 }
 
 type Snippet {
@@ -30,11 +28,10 @@ type Snippet {
 
 # the schema allows the following query:
 type Query {
-  library(id: ID!): Library
+  libraryById(id: ID!): Library
   allLibraries: [Library]
-  librariesByTag(tag: String!): [Library]
-  languages: [Language]
-  allTags: [String]
+  librariesByLanguage(language: String!): [Library]
+  allLanguages: [String]
 }
 
 

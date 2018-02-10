@@ -23,7 +23,7 @@ const Form = styled.form`
   text-align: center;
 `;
 
-class Game extends Component {
+class GameView extends Component {
   state = {
     completed: [],
     skipped: [],
@@ -176,4 +176,4 @@ class Game extends Component {
   }
 }
 
-export default Game;
+export default GameView;

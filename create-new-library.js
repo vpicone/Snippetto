@@ -5,134 +5,135 @@ const fs = require("fs");
 const path = require("path");
 const xml2js = require("xml2js");
 const util = require("util");
+const cloudinary = require('cloudinary');
 
 const Library = require("./models/Library");
+const uploadImage = require('./upload_image').upload;
+
+
+
+
 
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb://localhost/snipetto", {
   useMongoClient: true
 });
 
+
+
 const getFilePath = fileName => {
   return path.join(__dirname, `extensions/${fileName}`);
 };
 
-async function getLibraryDetails(fileName) {
-  const filePath = getFilePath(fileName);
-  const library = {};
-  var parser = new xml2js.Parser({
-    mergeAttrs: true,
-    explicitArray: false,
-    explicitCharkey: true,
-    normalizeTags: true
-  });
-
-  const data = fs.readFileSync(filePath + "/extension.vsixmanifest");
-  await parser.parseString(data, function(err, result) {
-    const metadata = result.packagemanifest.metadata;
-    // console.log(`${metadata.tags._.split(",").join("\n")}`);
-    const forbiddenTags = ["snippet", "vscode"];
-    const tags = _.uniq(
-      metadata.tags._.toLowerCase()
-        .split(",")
-        .filter(tag => {
-          return tag.match(RegExp(/^[^_\.]*$/)) && !forbiddenTags.includes(tag);
-        })
-    );
-
-    if (!tags.length) {
-      tags.push(metadata.displayname._.toLowerCase());
+function getSnippets(fileName, package) {
+  const snippetsPath = `${getFilePath(fileName)}/extension/snippets`;
+  const snippetFiles = package.contributes.snippets.map(
+    ({ language, path }) => {
+      return {
+        language,
+        path: `/${path.split("/").slice(-1)}`
+      };
     }
+  );
 
-    // Get Relevent links
-    const links = [];
-    metadata.properties.property
-      .filter(prop => {
-        return prop.Id.includes("Services.Links");
-      })
-      .forEach(linkProp => {
-        const uri = linkProp.Id.split(".");
-        links.push({
-          name: uri[4],
-          url: linkProp.Value
-        });
-        // links[uri[4]] = linkProp.Value;
-      });
+  // Get the various snippetLanguages for which snippets exist
+  const snippetLanguages = _.uniq(snippetFiles.map(file => file.language));
 
-    library.name = metadata.displayname._;
-    library.links = links;
-    library.tags = tags;
-    library.description = metadata.description._;
+  // Handles the new case where language is emitted for global snippets
+  if (!snippetLanguages.length) {
+    snippetLanguages.push("global");
+  }
+
+  // Get all of the snippet files and require their package.json
+  const filePaths = _.uniq(snippetFiles.map(({ path }) => snippetsPath + path));
+  const snippetObjects = filePaths.map(path => {
+    return require(path);
   });
-  return library;
+
+  // Combine the snippets into one mega object
+  const mergedSnippetObject = {};
+  snippetObjects.forEach(obj => {
+    _.assign(mergedSnippetObject, obj);
+  });
+
+  return {
+    snippetLanguages,
+    mergedSnippetObject
+  };
 }
 
-function getLibraryObject(fileName) {
-  const filePath = getFilePath(fileName);
+function uploadIcon(fileName){
 
-  const fileNames = fs.readdirSync(filePath + "/extension/snippets");
-  const pooledSnippets = {};
-  fileNames.forEach(fileName => {
-    const data = fs.readFileSync(`${filePath}/extension/snippets/${fileName}`);
-    Object.entries(JSON.parse(data)).forEach(([key, value]) => {
-      pooledSnippets[key] = value;
-    });
-  });
-
-  return pooledSnippets;
 }
 
 const createLibrary = async ({ fileName }) => {
-  const libraryObject = getLibraryObject(fileName);
-  // console.log(libraryObject);
-  const libraryDetails = await getLibraryDetails(fileName);
-  // console.log(libraryDetails);
 
-  const snippetKeys = _.keys(libraryObject);
-  const snippets = snippetKeys.map(key => {
-    const prefix = libraryObject[key].prefix;
-    const body = libraryObject[key].body;
-    const description = libraryObject[key].description || "";
+  const packageJSON = require(path.join(
+    __dirname,
+    `extensions/${fileName}/extension/package.json`
+  ));
+
+
+  const { mergedSnippetObject, snippetLanguages } = getSnippets(
+    fileName,
+    packageJSON
+  );
+
+  const snippetNames = _.keys(mergedSnippetObject);
+  const snippets = snippetNames.map(name => {
+    const prefix = mergedSnippetObject[name].prefix;
+    const body = mergedSnippetObject[name].body;
+    const description = mergedSnippetObject[name].description || "";
     return {
-      name: key,
+      name,
       prefix,
       description,
       body
     };
   });
 
-  // console.log({
-  //   name: libraryDetails.name,
-  //   tags: libraryDetails.tags,
-  //   description: libraryDetails.description,
-  //   urls: libraryDetails.urls
-  // });
+  const {
+    displayName: libraryName,
+    repository,
+    version,
+    description,
+    publisher,
+    homepage
+  } = packageJSON;
 
-  const { name, tags, description, links } = libraryDetails;
+  const links = [];
+  if (repository) {
+    links.push({ name: "repository", url: repository.url });
+  }
+  if (homepage) {
+    links.push({ name: "homepage", url: homepage });
+  }
+
+  let image = {};
+
+  if(packageJSON.icon) {
+    image = await uploadImage({path: `${getFilePath(fileName)}/extension/${packageJSON.icon}`, name: libraryName})
+  } else {
+    image = await uploadImage({path: "http://via.placeholder.com/128x128", name: libraryName})
+  }
+
 
   const library = new Library({
-    snippets,
-    name,
+    name: libraryName,
+    links,
     description,
-    tags,
-    links
+    version,
+    publisher,
+    snippets,
+    image,
+    languages: snippetLanguages
   });
 
-  // console.log({
-  // snippets,
-  // name,
-  // description,
-  // tags,
-  // urls
-  // });
-
-  // console.log(library);
   await library.save();
 };
 
-// console.log(fs.readdirSync(`${__dirname}/extensions/`));
-
 fs.readdir(`${__dirname}/extensions/`, (err, list) => {
+  // Filter out hidden items
   list = list.filter(item => !/(^|\/)\.[^\/\.]/g.test(item));
   list.forEach(lib => {
     createLibrary({ fileName: lib });

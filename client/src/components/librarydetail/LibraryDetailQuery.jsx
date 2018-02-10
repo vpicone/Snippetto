@@ -3,11 +3,15 @@ import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 
 const QUERY = gql`
-  query libraryDetail($id: ID!) {
-    library(id: $id) {
+  query LibraryById($id: ID!) {
+    libraryById(id: $id) {
       name
-      urls
+      links {
+        name
+        url
+      }
       id
+      description
       snippets {
         id
         description
@@ -18,24 +22,28 @@ const QUERY = gql`
   }
 `;
 
-class LibraryQuery extends Component {
+class LibraryDetail extends Component {
   render() {
-    const { isLoading, isError, library, children } = this.props;
-    return children && children(library, { isLoading, isError });
+    const { isLoading, isError, library, render } = this.props;
+    return render && render(library, { isLoading, isError });
   }
 }
 
 const mapDataToProps = ({ data }) => {
   const isLoading = data.loading;
   const isError = !!data.error;
-  const library = data.library || {};
+  const library = data.libraryById || {};
 
   return { isLoading, isError, library };
 };
 
-const mapPropsToOptions = ({ id }) => ({ variables: { id } });
+const mapPropsToOptions = ({ id }) => {
+  return {
+    variables: { id }
+  };
+};
 
 export default graphql(QUERY, {
   options: mapPropsToOptions,
   props: mapDataToProps
-})(LibraryQuery);
+})(LibraryDetail);

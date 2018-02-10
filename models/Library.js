@@ -2,15 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const SnippetSchema = new Schema({
-  name: String,
-  prefix: String,
-  body: [String],
-  description: String
-});
-
-const LinkSchema = new Schema({
-  name: String,
-  url: String
+  prefix: "string",
+  snippetName: { type: String },
+  body: ["string"],
+  description: "string"
 });
 
 const LibrarySchema = new Schema({
@@ -19,14 +14,25 @@ const LibrarySchema = new Schema({
     required: true,
     unique: true
   },
-  tags: {
-    type: [String],
-    lowercase: true,
-    trim: true
-  },
-  links: [LinkSchema],
+  publisher: String,
   description: String,
-  snippets: [SnippetSchema]
+  version: String,
+  languages: [String],
+  image: Schema.Types.Mixed,
+  links: [
+    {
+      name: String,
+      url: String
+    }
+  ],
+  snippets: [
+    {
+      prefix: String,
+      name: String,
+      body: [String],
+      description: String
+    }
+  ]
 });
 
 const Library = mongoose.model("library", LibrarySchema);

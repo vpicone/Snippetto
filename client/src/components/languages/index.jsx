@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 import LibraryListQuery from "./LibraryListQuery";
-import LibraryList from "./LibraryList";
+import LibraryListPresentation from "./LibraryListPresentation";
 
 class LibraryListContainer extends Component {
   state = {};
@@ -19,7 +19,7 @@ class LibraryListContainer extends Component {
           if (isError) {
             return <div>There was an error with the request...</div>;
           }
-          return <LibraryList libraries={libraries} />;
+          return <LibraryListPresentation libraries={libraries} />;
         }}
       />
     );

@@ -1,6 +1,9 @@
 import React, { Component, Fragment } from "react";
 import styled from "styled-components";
-import LibraryListItem from "./LibraryListItem";
+import LibraryListCard from "./LibraryListCard";
+import { Input } from "antd";
+
+const Search = Input.Search;
 
 const Grid = styled.div`
   display: flex;
@@ -11,7 +14,7 @@ const Grid = styled.div`
     display: grid;
     grid-gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(200px, auto));
-    grid-template-rows: repeat(auto-fit, minmax(100px, auto));
+    grid-template-rows: repeat(auto-fit, minmax(50px, auto));
   }
 `;
 
@@ -19,7 +22,7 @@ const InputContainer = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 1rem 0;
+  margin-bottom: 2rem;
 `;
 
 class LibraryList extends Component {
@@ -37,7 +40,7 @@ class LibraryList extends Component {
     return this.props.libraries.filter(lib => {
       return (
         lib.name.toLowerCase().includes(this.state.input) ||
-        lib.tags.join(" ").includes(this.state.input)
+        lib.languages.join(" ").includes(this.state.input)
       );
     });
   };
@@ -46,21 +49,19 @@ class LibraryList extends Component {
     return (
       <Fragment>
         <InputContainer>
-          <label>
-            Search:{` `}
-            <input
-              type="text"
-              value={this.state.input}
-              onChange={e =>
-                this.setState({ input: e.target.value.toLowerCase() })
-              }
-            />
-          </label>
+          <Search
+            placeholder="search libraries"
+            style={{ width: 300 }}
+            size="large"
+            onChange={e =>
+              this.setState({ input: e.target.value.toLowerCase() })
+            }
+          />
         </InputContainer>
         <Grid>
           {this.filterLibraries().map(lib => {
             return (
-              <LibraryListItem
+              <LibraryListCard
                 key={lib.id}
                 toggleExpand={this.toggleExpand}
                 expanded={this.state.expandedLibrary === lib.id}
