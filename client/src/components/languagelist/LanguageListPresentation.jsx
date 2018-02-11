@@ -1,13 +1,7 @@
 import React, { Component } from "react";
-import { Collapse, Avatar, Card, Button, Tooltip } from "antd";
+import { Avatar, Card, Button, Tooltip } from "antd";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-const Panel = Collapse.Panel;
-
-const gridStyle = {
-  width: "25%",
-  margin: "1rem"
-};
 
 const CardGrid = styled.div`
   display: grid;
@@ -31,7 +25,7 @@ export default class LanguageListPresentation extends Component {
           {language.libraries.map(
             ({ name, image, description, publisher, id }) => {
               return (
-                <Card style={{ margin: "1rem 0" }} type="inner" title={name}>
+                <Card style={{ margin: "2rem 1rem" }} type="inner" title={name}>
                   <CardGrid>
                     <Avatar
                       src={`https://res.cloudinary.com/vpp/image/upload/q_auto,b_white/${image}`}

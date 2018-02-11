@@ -26,12 +26,10 @@ const App = () => (
     <Content style={{ padding: "0 4rem", minHeight: "90vh" }}>
       <Switch>
         <Route exact path="/" component={LibraryList} />
-        <Route path="/library/:id" component={LibraryDetail} />
         <Route path="/library/:id/:view" component={LibraryDetail} />
         <Route path="/languages" component={LanguageList} />
       </Switch>
     </Content>
-
     <StyledFooter>Made with love by VPP</StyledFooter>
   </Layout>
 );

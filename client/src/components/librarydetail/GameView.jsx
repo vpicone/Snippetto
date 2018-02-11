@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import styled from "styled-components";
 import { Card, Alert } from "antd";
 
@@ -113,20 +113,27 @@ class GameView extends Component {
       this.state.completed.length + this.state.skipped.length;
 
     return (
-      <Fragment>
-        <h1>{this.props.name}</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          padding: "2rem"
+        }}
+      >
         <Card
           title={`${answeredCount}/${this.props.snippets.length}`}
           style={{ maxWidth: "600px" }}
         >
           <Grid>
             <div>
-              <strong>Name:</strong> {`${name}`}
+              <b>Name: </b>
+              {name}
               <br />
               {description && (
-                <Fragment>
-                  <strong>Description:</strong> {description}
-                </Fragment>
+                <span>
+                  <b>Description: </b>
+                  {description}
+                </span>
               )}
             </div>
             <Form onSubmit={this.handleSubmit}>
@@ -171,7 +178,7 @@ class GameView extends Component {
             style={{ marginTop: "1rem" }}
           />
         )}
-      </Fragment>
+      </div>
     );
   }
 }

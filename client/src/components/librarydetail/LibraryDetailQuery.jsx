@@ -12,6 +12,7 @@ const QUERY = gql`
       }
       id
       description
+      publisher
       snippets {
         id
         description

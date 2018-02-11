@@ -1,7 +1,8 @@
-import React from "react";
+import React, { Component } from "react";
 import { withRouter } from "react-router";
-import { Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Layout, Tabs, Icon } from "antd";
+import styled from "styled-components";
 
 import TableView from "./TableView";
 import GameView from "./GameView";
@@ -9,50 +10,63 @@ import GameView from "./GameView";
 const TabPane = Tabs.TabPane;
 const Content = Layout.Content;
 
-const LibraryDetailPresentation = ({ library, match }) => {
+const Title = styled.h1`
+  margin-right: 2rem;
+  font-size: 1.5rem;
+  text-align: right;
+`;
+
+class LibraryDetailPresentation extends Component {
   // Possible views: details, leaderboard, snippets
-
-  return (
-    <Content
-      style={{ background: "#fff", padding: 24, margin: 0, minHeight: 280 }}
-    >
-      <Tabs defaultActiveKey="1">
-        <TabPane
-          tab={
-            <span>
-              <Icon type="table" />Table
-            </span>
+  render() {
+    const { library, match } = this.props;
+    console.log(match.params);
+    return (
+      <Content
+        style={{
+          background: "#fff",
+          padding: "2rem",
+          minHeight: "280px",
+          maxWidth: "1000px",
+          margin: "2rem auto"
+        }}
+      >
+        <Tabs
+          tabBarExtraContent={
+            <Title>
+              <b>{library.name}</b> by {library.publisher}
+            </Title>
           }
-          key="1"
+          defaultActiveKey={match.params.view === "table" ? "1" : "2"}
         >
-          <TableView library={library} />
-        </TabPane>
-        <TabPane
-          tab={
-            <span>
-              <Icon type="play-circle-o" />Practice
-            </span>
-          }
-          key="2"
-        >
-          <GameView snippets={library.snippets} name={library.name} />
-        </TabPane>
-
-        <Route
-          exact
-          path={`${match.path}/table`}
-          render={() => <TableView library={library} />}
-        />
-        <Route
-          exact
-          path={`${match.path}/game`}
-          render={() => (
+          <TabPane
+            tab={
+              <span>
+                <Link to={`/library/${match.params.id}/table`}>
+                  <Icon type="table" />Table
+                </Link>
+              </span>
+            }
+            key="1"
+          >
+            <TableView library={library} />
+          </TabPane>
+          <TabPane
+            tab={
+              <Link to={`/library/${match.params.id}/game`}>
+                <span>
+                  <Icon type="play-circle-o" />Practice
+                </span>
+              </Link>
+            }
+            key="2"
+          >
             <GameView snippets={library.snippets} name={library.name} />
-          )}
-        />
-      </Tabs>
-    </Content>
-  );
-};
+          </TabPane>
+        </Tabs>
+      </Content>
+    );
+  }
+}
 
 export default withRouter(LibraryDetailPresentation);

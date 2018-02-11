@@ -11,7 +11,6 @@ class LibraryListItem extends Component {
       id,
       name,
       languages,
-      links,
       description,
       publisher,
       image
