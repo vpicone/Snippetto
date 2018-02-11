@@ -1,7 +1,5 @@
-import React, { Component, Fragment } from "react";
-import { Image } from "cloudinary-react";
+import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
 import { Card, Icon, Avatar, Tag, Tooltip } from "antd";
 const { Meta } = Card;
 

@@ -1,4 +1,4 @@
-const { uniqBy, union, flatten, uniq } = require("lodash");
+const { uniqBy, union, flatten, uniq, sortBy } = require("lodash");
 const mongoose = require("mongoose");
 
 const Library = require("../models/Library");
@@ -9,15 +9,32 @@ const resolvers = {
     allLibraries: () => Library.find({}),
     allLanguages: async () => {
       const allLibraries = await Library.find({});
-      const allLanguages = allLibraries.map(({ languages }) => languages);
-      return union(uniq(flatten(allLanguages)));
+      const allLanguagesWithDuplicates = allLibraries.map(
+        ({ languages }) => languages
+      );
+      const allLanguages = union(uniq(flatten(allLanguagesWithDuplicates)));
+      const languageObjects = allLanguages.map(language => {
+        const libraries = allLibraries.filter(lib => {
+          return lib.languages.includes(language);
+        });
+        return {
+          name: language,
+          libraries: sortBy(libraries, "name")
+        };
+      });
+      return sortBy(languageObjects, ["name"]);
     },
-    librariesByLanguage: (_, { language }) => {
-      return Library.find({ languages: language });
+    librariesByLanguage: async (_, { language }) => {
+      const libraries = await Library.find({
+        languages: language.toLowerCase()
+      });
+      return sortBy(libraries, "name");
     }
   },
   Library: {
-    image({image}) {return image.public_id},
+    image({ image }) {
+      return image.public_id;
+    }
   }
 };
 

@@ -1,5 +1,8 @@
 import React, { Component } from "react";
-import { Table } from "antd";
+import { Table, Layout, Button } from "antd";
+import { Link } from "react-router-dom";
+
+const Content = Layout.Content;
 
 const columns = [
   {
@@ -18,6 +21,23 @@ const columns = [
     key: "prefix"
   }
 ];
+
+const Title = props => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "1rem"
+      }}
+    >
+      <h1>{props.children}</h1>
+      <Link to={`/library/${props.id}/game`}>
+        <Button size="large" shape="circle" icon="play-circle-o" />
+      </Link>
+    </div>
+  );
+};
 
 class TableView extends Component {
   state = { pageSize: 50 };
@@ -44,11 +64,12 @@ class TableView extends Component {
     return (
       <Table
         style={{ margin: "25px" }}
-        bordered
         dataSource={this.snippetsToDataSource()}
         pagination={{ pageSize: 25, showSizeChanger: true }}
         columns={columns}
-        title={() => <h1>{this.props.library.name}</h1>}
+        title={() => (
+          <Title id={this.props.library.id}>{this.props.library.name}</Title>
+        )}
       />
     );
   }

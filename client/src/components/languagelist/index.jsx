@@ -1,15 +1,15 @@
 import React, { Component } from "react";
 
-import LibraryListQuery from "./LibraryListQuery";
-import LibraryListPresentation from "./LibraryListPresentation";
+import LanguageListQuery from "./LanguageListQuery";
+import LanguageListPresentation from "./LanguageListPresentation";
 
-class LibraryListContainer extends Component {
+class LanguageList extends Component {
   state = {};
 
   render() {
     return (
-      <LibraryListQuery
-        render={(libraries, { isLoading, isEmpty, isError }) => {
+      <LanguageListQuery
+        render={(languages, { isLoading, isEmpty, isError }) => {
           if (isLoading) {
             return null;
           }
@@ -19,11 +19,11 @@ class LibraryListContainer extends Component {
           if (isError) {
             return <div>There was an error with the request...</div>;
           }
-          return <LibraryListPresentation libraries={libraries} />;
+          return <LanguageListPresentation languages={languages} />;
         }}
       />
     );
   }
 }
 
-export default LibraryListContainer;
+export default LanguageList;

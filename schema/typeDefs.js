@@ -1,5 +1,10 @@
 const typeDefs = `
 
+type Language {
+  name: String!
+  libraries: [Library]
+}
+
 type Link {
   name: String!
   url: String!
@@ -31,7 +36,7 @@ type Query {
   libraryById(id: ID!): Library
   allLibraries: [Library]
   librariesByLanguage(language: String!): [Library]
-  allLanguages: [String]
+  allLanguages: [Language]
 }
 
 

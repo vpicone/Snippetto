@@ -8,12 +8,11 @@ const Search = Input.Search;
 const Grid = styled.div`
   display: flex;
   flex-wrap: wrap;
-  max-width: 800px;
 
   @supports (display: grid) {
     display: grid;
     grid-gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+    grid-template-columns: repeat(auto-fit, minmax(250px, auto));
     grid-template-rows: repeat(auto-fit, minmax(50px, auto));
   }
 `;
@@ -22,7 +21,7 @@ const InputContainer = styled.div`
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin: 2rem 0;
 `;
 
 class LibraryList extends Component {
