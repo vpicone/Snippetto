@@ -6,13 +6,6 @@ const QUERY = gql`
   {
     allLanguages {
       name
-      libraries {
-        id
-        name
-        image
-        description
-        publisher
-      }
     }
   }
 `;

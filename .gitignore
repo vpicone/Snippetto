@@ -1,5 +1,4 @@
-keys.js
-
+extension_manager
 
 # Created by https://www.gitignore.io/api/node
 
@@ -70,3 +69,5 @@ typings/
 # Custom
 extensions
 .vscode
+
+.DS_Store

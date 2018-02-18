@@ -3,6 +3,7 @@ import { withRouter } from "react-router";
 import { Link } from "react-router-dom";
 import { Layout, Tabs, Icon } from "antd";
 import styled from "styled-components";
+import Fade from "../shared/Fade";
 
 import TableView from "./TableView";
 import GameView from "./GameView";
@@ -17,25 +18,25 @@ const Title = styled.h1`
 `;
 
 class LibraryDetailPresentation extends Component {
-  // Possible views: details, leaderboard, snippets
   render() {
     const { library, match } = this.props;
-    console.log(match.params);
     return (
       <Content
         style={{
           background: "#fff",
           padding: "2rem",
-          minHeight: "280px",
-          maxWidth: "1000px",
+          minHeight: "90vh",
+          maxWidth: "1240px",
           margin: "2rem auto"
         }}
       >
         <Tabs
           tabBarExtraContent={
-            <Title>
-              <b>{library.name}</b> by {library.publisher}
-            </Title>
+            this.props.name && (
+              <Title>
+                <b>{this.props.name}</b> by {this.props.publisher}
+              </Title>
+            )
           }
           defaultActiveKey={match.params.view === "table" ? "1" : "2"}
         >
@@ -49,7 +50,9 @@ class LibraryDetailPresentation extends Component {
             }
             key="1"
           >
-            <TableView library={library} />
+            <Fade in={!this.props.loading}>
+              {!this.props.loading && <TableView library={library} />}
+            </Fade>
           </TabPane>
           <TabPane
             tab={
@@ -61,7 +64,11 @@ class LibraryDetailPresentation extends Component {
             }
             key="2"
           >
-            <GameView snippets={library.snippets} name={library.name} />
+            {!this.props.loading && (
+              <Fade in={!this.props.loading}>
+                <GameView snippets={library.snippets} name={this.props.name} />
+              </Fade>
+            )}
           </TabPane>
         </Tabs>
       </Content>

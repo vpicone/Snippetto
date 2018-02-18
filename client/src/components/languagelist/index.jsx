@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Select } from "antd";
 
 import LanguageListQuery from "./LanguageListQuery";
 import LanguageListPresentation from "./LanguageListPresentation";
@@ -11,7 +12,13 @@ class LanguageList extends Component {
       <LanguageListQuery
         render={(languages, { isLoading, isEmpty, isError }) => {
           if (isLoading) {
-            return null;
+            return (
+              <Select
+                size={"large"}
+                style={{ width: 300 }}
+                placeholder="Loading"
+              />
+            );
           }
           if (isEmpty) {
             return <div>No languages found.</div>;
@@ -19,7 +26,12 @@ class LanguageList extends Component {
           if (isError) {
             return <div>There was an error with the request...</div>;
           }
-          return <LanguageListPresentation languages={languages} />;
+          return (
+            <LanguageListPresentation
+              onChange={this.props.onChange}
+              languages={languages}
+            />
+          );
         }}
       />
     );

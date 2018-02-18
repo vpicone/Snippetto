@@ -12,10 +12,6 @@ import LanguageList from "./languagelist";
 const { Content, Footer } = Layout;
 
 const StyledFooter = styled(Footer)`
-  /* position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0; */
   padding: 1rem;
   text-align: center;
 `;

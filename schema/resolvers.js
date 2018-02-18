@@ -6,9 +6,9 @@ const Library = require("../models/Library");
 const resolvers = {
   Query: {
     libraryById: (_, { id }) => Library.findById({ _id: id }),
-    allLibraries: () => Library.find({}),
+    allLibraries: () => Library.find({}, { snippets: 0 }),
     allLanguages: async () => {
-      const allLibraries = await Library.find({});
+      const allLibraries = await Library.find({}, { languages: 1 });
       const allLanguagesWithDuplicates = allLibraries.map(
         ({ languages }) => languages
       );

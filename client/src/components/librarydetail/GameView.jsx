@@ -1,26 +1,31 @@
 import React, { Component } from "react";
 import styled from "styled-components";
-import { Card, Alert } from "antd";
+import { Card, Alert, Button, Tooltip, Form, Input, Divider } from "antd";
+import SnippetBody from "./SnippetBody";
+import CompletedGame from "./CompletedGame";
+const FormItem = Form.Item;
 
-const Grid = styled.div`
+const GameContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  justify-content: center;
+  min-height: 80vh;
+  margin-top: 2rem;
+`;
+
+const FormGrid = styled.div`
   display: grid;
+  grid-gap: 1rem;
+  min-height: 35vh;
+  grid-template-columns: 1fr 275px;
+  justify-content: center;
   justify-items: center;
   align-items: center;
-  grid-gap: 1rem;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 0.5fr 0.5fr;
 `;
 
-const Input = styled.input`
-  border: 2px solid;
-  border-radius: 4px;
-  border-color: ${props => (props.correct ? "forestgreen" : "default")};
-  margin: 1rem;
-`;
-
-const Form = styled.form`
-  grid-row-start: span 2;
-  text-align: center;
+const GridItem = styled.div`
+  padding: 0.5rem;
 `;
 
 class GameView extends Component {
@@ -29,19 +34,31 @@ class GameView extends Component {
     skipped: [],
     currentSnippet: null,
     alert: {},
-    correctInput: false,
     value: "",
-    reveal: false
+    revealed: false,
+    done: false
   };
 
-  componentDidMount() {
+  clearAlert() {
+    setTimeout(
+      () =>
+        this.setState({
+          alert: {}
+        }),
+      1000
+    );
+  }
+  componentDidMount = () => {
     const remainingSnippets = this.getRemainingSnippets();
     this.setState({ currentSnippet: remainingSnippets[0] });
-    this.textInput && this.focusTextInput();
-  }
+  };
 
-  focusTextInput = () => {
-    this.textInput.focus();
+  restartGame = () => {
+    this.setState({
+      completed: [],
+      skipped: [],
+      done: false
+    });
   };
 
   getRemainingSnippets = () => {
@@ -50,42 +67,54 @@ class GameView extends Component {
         snippet
       );
     });
+
     return remainingSnippets;
   };
 
   handleSkip = () => {
     const remainingSnippets = this.getRemainingSnippets();
-    this.setState({
-      skipped: [...this.state.skipped, remainingSnippets[0]],
-      currentSnippet: remainingSnippets[1]
-    });
-    this.focusTextInput();
+    if (remainingSnippets.length === 1) {
+      this.setState({
+        done: true,
+        skipped: [...this.state.skipped, remainingSnippets[0]],
+        alert: { message: "Skipped", type: "warning" }
+      });
+    } else {
+      this.setState({
+        skipped: [...this.state.skipped, remainingSnippets[0]],
+        currentSnippet: remainingSnippets[1],
+        alert: { message: "Skipped", type: "warning" }
+      });
+    }
+
+    this.clearAlert();
   };
 
   handleComplete = () => {
     const remainingSnippets = this.getRemainingSnippets();
-    this.setState({
-      completed: [...this.state.completed, remainingSnippets[0]],
-      currentSnippet: remainingSnippets[1],
-      alert: { message: "Correct!", type: "success" },
-      value: "",
-      correctInput: false
-    });
-    this.focusTextInput();
+    if (remainingSnippets.length === 1) {
+      this.setState({
+        done: true,
+        completed: [...this.state.completed, remainingSnippets[0]],
+        alert: { message: "Correct!", type: "success" }
+      });
+    } else {
+      this.setState({
+        completed: [...this.state.completed, remainingSnippets[0]],
+        currentSnippet: remainingSnippets[1],
+        alert: { message: "Correct!", type: "success" },
+        value: ""
+      });
+    }
   };
 
   handleChange = e => {
-    const { value } = e.target;
-    const correctInput = value === this.state.currentSnippet.prefix;
-    this.setState({
-      correctInput,
-      value
-    });
+    this.setState({ value: e.target.value });
   };
 
   handleSubmit = event => {
     event.preventDefault();
-    if (this.state.correctInput) {
+    if (this.state.value === this.state.currentSnippet.prefix) {
       this.handleComplete();
     } else {
       this.setState({
@@ -95,90 +124,107 @@ class GameView extends Component {
     }
 
     //Clear success/error alerts
-    setTimeout(
-      () =>
-        this.setState({
-          alert: {}
-        }),
-      2000
-    );
+    this.clearAlert();
   };
 
   render() {
-    if (!this.state.currentSnippet) {
-      return null;
-    }
-    const { name, description } = this.state.currentSnippet;
     const answeredCount =
       this.state.completed.length + this.state.skipped.length;
 
+    if (this.state.done) {
+      return (
+        <GameContainer>
+          <CompletedGame
+            restartGame={this.restartGame}
+            completedPercent={
+              this.state.completed.length / this.props.snippets.length
+            }
+          />
+        </GameContainer>
+      );
+    }
+
+    if (!this.state.currentSnippet && !this.state.done) {
+      return null;
+    }
+
+    const validInput =
+      this.state.value === this.state.currentSnippet.prefix ? "success" : "";
+
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          padding: "2rem"
-        }}
-      >
+      <GameContainer>
         <Card
-          title={`${answeredCount}/${this.props.snippets.length}`}
-          style={{ maxWidth: "600px" }}
+          title={this.state.currentSnippet.name}
+          extra={`${answeredCount + 1}/${this.props.snippets.length}`}
+          style={{ width: "70%" }}
         >
-          <Grid>
-            <div>
-              <b>Name: </b>
-              {name}
-              <br />
-              {description && (
-                <span>
-                  <b>Description: </b>
-                  {description}
-                </span>
-              )}
-            </div>
-            <Form onSubmit={this.handleSubmit}>
-              <label>
-                <strong>Prefix: </strong>
-                <Input
-                  type="text"
-                  onChange={this.handleChange}
-                  value={this.state.value}
-                  correct={this.state.correctInput}
-                  innerRef={x => {
-                    this.textInput = x;
-                  }}
-                />
-              </label>
-              <br />
-              <input type="submit" value="submit" />
-            </Form>
-            <div>
-              <button onClick={this.handleSkip}>Skip</button>
-              <button
-                onClick={() => {
-                  this.setState({ reveal: !this.state.reveal });
+          <Form layout="inline" onSubmit={this.handleSubmit}>
+            <FormGrid>
+              <GridItem
+                style={{
+                  overflow: "hidden",
+                  overflowWrap: "break-word"
                 }}
               >
-                Reveal
-              </button>
-              <button
-                disabled={!this.state.correctInput}
-                onClick={this.handleComplete}
-              >
-                Complete
-              </button>
-            </div>
-            {this.state.reveal && this.state.currentSnippet.prefix}
-          </Grid>
+                {this.state.currentSnippet.description}
+                <Divider />
+                <SnippetBody body={this.state.currentSnippet.body} />
+              </GridItem>
+              <GridItem>
+                <FormItem
+                  hasFeedback
+                  label="prefix"
+                  validateStatus={validInput}
+                >
+                  <Input
+                    autoFocus
+                    placeholder={
+                      this.state.revealed
+                        ? this.state.currentSnippet.prefix
+                        : ""
+                    }
+                    value={this.state.value}
+                    onChange={this.handleChange}
+                  />
+                </FormItem>
+                <Tooltip
+                  title={
+                    this.state.revealed ? "hide answers" : "reveal answers"
+                  }
+                >
+                  <Button
+                    style={{ marginRight: "1rem" }}
+                    shape="circle"
+                    icon={this.state.revealed ? "minus" : "plus"}
+                    onClick={() => {
+                      this.setState({ revealed: !this.state.revealed });
+                    }}
+                  />
+                </Tooltip>
+                <Button onClick={this.handleSkip}>Skip</Button>
+                <Button
+                  type="primary"
+                  style={{ marginLeft: "1rem" }}
+                  disabled={!validInput}
+                  onClick={this.handleComplete}
+                >
+                  Complete
+                </Button>
+              </GridItem>
+            </FormGrid>
+          </Form>
         </Card>
         {this.state.alert.message && (
           <Alert
+            style={{
+              position: "fixed",
+              bottom: "3rem"
+            }}
             message={this.state.alert.message}
             type={this.state.alert.type}
-            style={{ marginTop: "1rem" }}
           />
         )}
-      </div>
+      </GameContainer>
     );
   }
 }

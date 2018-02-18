@@ -18,6 +18,7 @@ const QUERY = gql`
         description
         prefix
         name
+        body
       }
     }
   }

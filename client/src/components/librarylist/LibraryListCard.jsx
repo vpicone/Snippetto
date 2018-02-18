@@ -1,20 +1,13 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { Card, Icon, Avatar, Tag, Tooltip } from "antd";
+import { Card, Icon, Avatar, Tooltip } from "antd";
 const { Meta } = Card;
 
 class LibraryListItem extends Component {
   state = { expanded: false };
 
   render() {
-    const {
-      id,
-      name,
-      languages,
-      description,
-      publisher,
-      image
-    } = this.props.library;
+    const { id, name, description, publisher, image } = this.props.library;
 
     return (
       <Card
@@ -26,7 +19,12 @@ class LibraryListItem extends Component {
         bodyStyle={{ height: "calc(100% - 47px)" }}
         actions={[
           <Tooltip placement="bottomRight" title={"snippet table"}>
-            <Link to={`/library/${id}/table`}>
+            <Link
+              to={{
+                pathname: `/library/${id}/table`,
+                state: { name, publisher }
+              }}
+            >
               <Icon type="table" />
             </Link>
           </Tooltip>,
@@ -52,14 +50,6 @@ class LibraryListItem extends Component {
         {this.props.expanded && (
           <div style={{ marginTop: "1rem" }}>
             <p>{description}</p>
-            <h6 style={{ marginRight: 8, display: "inline" }}>Languages:</h6>
-            {languages.map((language, index) => {
-              return (
-                <Tag style={{ margin: "4px" }} key={index}>
-                  {language}
-                </Tag>
-              );
-            })}
           </div>
         )}
       </Card>
